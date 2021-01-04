@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         Highlight subtasks
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.1.1
+// @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/highlight_subtasks.js
 // @description  It colors the JIRA-Ids so that subtasks are easily recognized to which story they belong
 // @author       raphael.imahorn
 // @match        *.atlassian.net/secure/RapidBoard.jspa*
