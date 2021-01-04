@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         Azure DevOps Jira integration
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.0.1
+// @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/highlight_subtasks.js
 // @description  link to jira
 // @author       raphael.imahorn
 // @match        https://dev.azure.com/*
