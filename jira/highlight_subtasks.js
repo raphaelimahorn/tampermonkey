@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Highlight subtasks
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  It colors the JIRA-Ids so that subtasks are easily recognized to which story they belong
 // @author       raphael.imahorn
 // @match        *.atlassian.net/secure/RapidBoard.jspa*
@@ -60,12 +60,7 @@
         };
     };
 
-    const makeLabelFancy = (label, issue) => {
-                        label.style.background = getRandomColor(issue);
-                label.style.color = '#fff';
-                label.style.padding = "2px 4px";
-                label.style.borderRadius = "4px";
-    };
+    const makeLabelFancy = (label, issue) => label.style.color = getRandomColor(issue);
 
     const makeFancy = () => {
         const groups = [...document.querySelectorAll('.ghx-parent-group')];
