@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Azure DevOps Jira integration
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1
+// @version      1.0.2
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/azure/jira_integration.js
 // @description  link to jira
 // @author       raphael.imahorn
@@ -36,7 +36,7 @@
 
     issues.forEach(issue => {
         var a = document.createElement('a');
-        var linkText = document.createTextNode(issue);
+        var linkText = document.createTextNode(issue + ' ');
         a.appendChild(linkText);
         a.title = issue;
         a.href = `${jiraBasePath}/browse/${issue}`;
