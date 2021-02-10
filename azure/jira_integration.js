@@ -6,6 +6,7 @@
 // @description  link to jira
 // @author       raphael.imahorn
 // @match        https://dev.azure.com/*
+// @match        https://*.visualstudio.com/*
 // @grant        none
 // ==/UserScript==
 
