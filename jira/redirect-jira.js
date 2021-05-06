@@ -6,6 +6,7 @@
 // @author       raphael.imahorn
 // @match        https://www.google.com/search?q=*
 // @grant        none
+// @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/redirect-jira.js
 // ==/UserScript==
 
 (function() {
