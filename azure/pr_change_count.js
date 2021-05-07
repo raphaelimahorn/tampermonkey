@@ -1,62 +1,73 @@
 // ==UserScript==
 // @name         PR Change Count
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      1.0.0
 // @description  displays how many lines are altered in the current PR
-// @author       You
-// @match        https://dev.azure.com/*/_git/*/pullrequest/*
+// @author       raphael.imahorn
+// @match        https://dev.azure.com/*/_git/*/pullrequest/*?_a=files
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
+// @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/azure/pr_change_count.js
 // ==/UserScript==
 
-(async function() {
+(async function () {
     'use strict';
-    //    var baseVersion = 'feature%2Fseafire%2Fnoissue_remove_id_fromOpenCustomerBacklogEvent';
-    var urlGroups = document.URL.match(/(?<base>.*)_git\/(?<repo>.*)\/p/).groups;
+    const affectedFiles = document.getElementsByClassName('repos-compare-toolbar')[0]
+        ?.getElementsByClassName('body-m')[0]
+        ?.textContent
+        ?.match(/([0-9]+)/)[1];
 
-    var branchname = document.getElementsByClassName('pr-header-branches')[0].getElementsByTagName('a')[0].textContent;
-    console.log(branchname);
-    var baseVersion = branchname.replaceAll('/', '%2F');
+    if (!+affectedFiles) {
+        console.log("There are no files affected in this PR");
+        return;
+    }
 
-    var request = `${urlGroups.base}_apis/git/repositories/${urlGroups.repo}/diffs/commits?baseVersion=${baseVersion}&targetVersion=master&api-version=6.1-preview.1`;
-    console.log(request);
-    var changes;
+    waitForChangesLoaded(+affectedFiles, processLoadedChanges);
 
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4) {
-            if (this.status == 200 ) {
-                changes = JSON.parse(this.responseText)?.changeCounts;
-                if (!changes) return;
-
-                var elementToInsert = document.getElementsByClassName('pr-secondary-title-row')[0];
-                console.log(changes);
-                if (changes.Edit){
-                    changes.Add = (changes.Add ?? 0) + changes.Edit;
-                    changes.Delete = (changes.Delete ?? 0) + changes.Edit;
-                }
-                console.log(changes);
-
-                var span = document.createElement('span');
-                elementToInsert.appendChild(span);
-                elementToInsert = span;
-                if(changes.Delete){
-                    var delspan = document.createElement('span');
-                    var deltext = document.createTextNode(`-${changes.Delete}`);
-                    delspan.classList.add('repos-compare-removed-lines');
-                    delspan.appendChild(deltext);
-                    elementToInsert.appendChild(delspan);
-                }
-                if(changes.Add){
-                    var addspan = document.createElement('span');
-                    var addtext = document.createTextNode(`+${changes.Add}`);
-                    addspan.classList.add('repos-compare-added-lines');
-                    addspan.appendChild(addtext);
-                    elementToInsert.appendChild(addspan);
-                }
-            }
+    function waitForChangesLoaded(desiredChanges, callback, maxTries = 60) {
+        // TODO this might not work as desired
+        const loadedChanges = document.getElementsByClassName('repos-summary-code-diff').length + document.getElementsByClassName('repos-summary-message').length;
+        if (loadedChanges < desiredChanges) {
+            if (maxTries === 0) throw Error('There were not all files loaded in 60 tries');
+            setTimeout(_ => waitForChangesLoaded(desiredChanges, callback, maxTries - 1), 500);
+        } else {
+            setTimeout(callback, 250);
+            setTimeout(callback, 1000);
         }
-    };
-    xhttp.open("GET", request , true);
-    xhttp.send();
+    }
+
+    function processLoadedChanges() {
+        const files = [...document.getElementsByClassName('repos-summary-header')];
+
+        let additions = 0;
+        let deletions = 0;
+
+        files.forEach(file => {
+            deletions += +(file.getElementsByClassName('repos-compare-removed-lines')[0]?.textContent ?? 0);
+            additions += +(file.getElementsByClassName('repos-compare-added-lines')[0]?.textContent ?? 0);
+        });
+
+        let elementToInsert = document.getElementsByClassName('pr-secondary-title-row')[0];
+        document.getElementById('pr-change-count--repo-compare-lines')?.remove();
+        const span = document.createElement('span');
+        span.id = 'pr-change-count--repo-compare-lines';
+        elementToInsert.appendChild(span);
+        elementToInsert = span;
+
+        if (deletions) {
+            const delspan = document.createElement('span');
+            const deltext = document.createTextNode(`${deletions}`);
+            delspan.classList.add('repos-compare-removed-lines');
+            delspan.appendChild(deltext);
+            elementToInsert.appendChild(delspan);
+        }
+
+        if (additions) {
+            const addspan = document.createElement('span');
+            const addtext = document.createTextNode(`+${additions}`);
+            addspan.classList.add('repos-compare-added-lines');
+            addspan.appendChild(addtext);
+            elementToInsert.appendChild(addspan);
+        }
+    }
 })();
