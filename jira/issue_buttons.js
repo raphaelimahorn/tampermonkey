@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      1.0.3
+// @version      1.1.0
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.js
 // @description  adds some buttons to jira issues
 // @author       raphael.imahorn
@@ -91,12 +91,17 @@
 
     // end common functions
 
+
+    const findKeyNode = node => {
+        const issueNode = findParentOfClass(node, 'ghx-issue');
+        return issueNode?.getElementsByClassName('ghx-key')[0];
+    }
+
     /** @param {Node} button
      * @param {MouseEvent} event
      */
     const copyIssueAsMarkUp = (button, event) => {
-        const issueNode = findParentOfClass(button, 'ghx-issue');
-        const keyNode = issueNode?.getElementsByClassName('ghx-key')[0];
+        const keyNode = findKeyNode(button);
         if (!keyNode) return;
 
         const issue = keyNode.textContent;
@@ -111,8 +116,7 @@
      * @param {MouseEvent} event
      */
     const copyBranchName = (button, event) => {
-        const issueNode = findParentOfClass(button, 'ghx-issue');
-        const keyNode = issueNode?.getElementsByClassName('ghx-key')[0];
+        const keyNode = findKeyNode(button);
         if (!keyNode) return;
 
         const issue = keyNode.textContent.toLowerCase();
@@ -121,6 +125,59 @@
 
         const link = `${prefix}/${teamName}/${issue}`;
         copyToClipboard(link);
+        event.stopPropagation();
+    };
+
+    /**
+     * @param {Node} node
+     */
+    const getKeyAndTitleOfStory = node => {
+        const keyNode = findKeyNode(node);
+        if (!keyNode) return;
+
+        const key = keyNode.textContent;
+        const description = keyNode.nextSibling.textContent;
+        return `${key} ${description}`;
+    }
+
+    /**
+     * @param parent
+     * @param {Node} node
+     */
+    const getKeyAndTitleOfSubTask = (parent, node) => {
+        let subtask = getKeyAndTitleOfStory(node);
+        if (!subtask) return;
+
+
+        const parentKey = parent.getElementsByClassName('ghx-key')[0];
+        if (!parentKey) return subtask;
+
+        const key = parentKey.textContent;
+        const description = parentKey.nextSibling.textContent;
+        const story = `${key} ${description}`;
+
+        // used for interoperability with highlight_subtask userscript
+        const parts = subtask.split(' ➤ ');
+        subtask = parts[parts.length - 1];
+
+        if (subtask === story) return story;
+
+        return `${subtask} <- ${story}`;
+    }
+
+    /** @param {Node} button
+     * @param {MouseEvent} event
+     */
+    const copyKeyAndTitle = (button, event) => {
+        const parentNodeIfAny = findParentOfClass(button, 'ghx-parent-group');
+
+        const keyAndTitle = !parentNodeIfAny
+            ? getKeyAndTitleOfStory(button)
+            : getKeyAndTitleOfSubTask(parentNodeIfAny, button);
+
+        if (!keyAndTitle) return;
+
+        copyToClipboard(keyAndTitle);
         event.stopPropagation();
     };
 
@@ -146,11 +203,22 @@
         parent.appendChild(btn);
     };
 
+    const addCopyKeyAndTitle = parent => {
+        const btn = document.createElement('button');
+
+        setButtonTextContent(btn, 'desc'); // TODO
+
+        btn.onclick = event => copyKeyAndTitle(btn, event);
+
+        parent.appendChild(btn);
+    }
+
     const addButtonListToFooters = footers => [...footers].forEach(footer => {
         const container = document.createElement('div');
         container.classList.add(buttonContainerClass);
 
         // add buttons
+        addCopyKeyAndTitle(container);
         addCopyBranchName(container);
         addCopyMarkupLink(container);
 
