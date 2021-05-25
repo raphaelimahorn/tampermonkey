@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      1.0.2
+// @version      1.0.3
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.js
 // @description  adds some buttons to jira issues
 // @author       raphael.imahorn
@@ -16,7 +16,7 @@
 
     const buttonContainerClass = 'ri-jira-footer-buttons';
     const buttonClass = 'ri-jira-story-button';
-    const teamName = loadOrInsertFromStorage('ri-jira-issues-team');
+    const teamName = loadOrInsertFromStorage('ri-jira-issues-team', 'Please insert your team name');
 
     const getFooters = () => document.getElementsByClassName('ghx-card-footer');
 
