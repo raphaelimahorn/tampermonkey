@@ -6,7 +6,7 @@
 function findParentOfClass(node, clazz) {
     const parent = node.parentNode;
 
-    if (!parent) return;
+    if (!parent?.classList) return;
 
     return parent.classList.contains(clazz)
         ? parent

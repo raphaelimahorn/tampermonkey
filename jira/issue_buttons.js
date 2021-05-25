@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1
+// @version      1.0.2
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.js
 // @description  adds some buttons to jira issues
 // @author       raphael.imahorn
@@ -41,7 +41,7 @@
     function findParentOfClass(node, clazz) {
         const parent = node.parentNode;
 
-        if (!parent) return;
+        if (!parent?.classList) return;
 
         return parent.classList.contains(clazz)
             ? parent
