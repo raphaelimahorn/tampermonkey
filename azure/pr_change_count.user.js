@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         PR Change Count
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.0.1
 // @description  displays how many lines are altered in the current PR
 // @author       raphael.imahorn
 // @match        https://dev.azure.com/*/_git/*/pullrequest/*?_a=files
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
-// @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/azure/pr_change_count.js
+// @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/azure/pr_change_count.user.js
 // ==/UserScript==
 
 (async function () {

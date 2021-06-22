@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         Redirect Jira Issues
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.0.1
 // @description  Redirect Jira issues, that are in a google query to a desired jira url
 // @author       raphael.imahorn
 // @match        https://www.google.com/search?q=*
 // @grant        none
-// @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/redirect-jira.js
+// @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/redirect-jira.user.js
 // ==/UserScript==
 
 (function() {
