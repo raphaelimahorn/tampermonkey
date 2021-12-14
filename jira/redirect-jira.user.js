@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Redirect Jira Issues
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1
+// @version      1.0.2
 // @description  Redirect Jira issues, that are in a google query to a desired jira url
 // @author       raphael.imahorn
 // @match        https://www.google.com/search?q=*
@@ -28,7 +28,7 @@
 
     redirectUrl = prompt(
         `Would you like to add redirects for queries wiht pattern ${project}-123 to a jira repitory? If so please insert the corresponding redirect base url:`,
-        'https://jira.devinite.com/browse/')
+        'https://jiradg.atlassian.net/browse/')
         ?.trim()
         ?? IgnoreProject;
     if (!redirectUrl.length) redirectUrl = IgnoreProject;
