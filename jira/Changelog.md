@@ -1,5 +1,15 @@
 ﻿#Changelog
-##issue_buttons.user.js
+
+## highlight_subtasks.user.js
+
+* 1.2.0 Update to jira cloud version
+
+
+## redirect-jira.user.js
+
+* 1.0.2 Update default url to cloud version
+
+## issue_buttons.user.js
 
 * 1.1.1. updates the script update url and changes the file extension to *.user.js s.t. tampermonkey recognises the script
 * 1.1.0. adds a new button to copy the Key and Title of the issue e.g. _XYZ-1234 Add a new Button_

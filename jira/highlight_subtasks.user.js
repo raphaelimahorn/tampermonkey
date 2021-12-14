@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name         Highlight subtasks
 // @namespace    http://tampermonkey.net/
-// @version      1.1.2
+// @version      1.2.0
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/highlight_subtasks.user.js
 // @description  It colors the JIRA-Ids so that subtasks are easily recognized to which story they belong
 // @author       raphael.imahorn
-// @match        *.atlassian.net/secure/RapidBoard.jspa*
+// @match        *.atlassian.net/jira/software/c/projects/*/boards/*
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     const getHash = (name) => {
@@ -30,28 +30,29 @@
     };
 
     const colorChildren = (group, issue) => {
-        group.querySelectorAll('a.ghx-key-link')
+        group.querySelectorAll('a.ghx-key')
             .forEach(task => {
-            if(task.classList.contains('dg-fancy')) return;
-            task.innerHTML = `${issue} &#10148; ${task.title}`;
-            task.style.color = getRandomColor(issue);
-            task.classList.add("dg-fancy");
-        });
+                if (task.classList.contains('dg-fancy')) return;
+                // TODO, here one could split the inner html to 2 references
+                task.innerHTML = `${issue} &#10148; ${task.dataset.tooltip}`;
+                task.style.color = getRandomColor(issue);
+                task.classList.add("dg-fancy");
+            });
     };
 
     const debounce = (func, wait, immediate) => {
-        var timeout;
+        let timeout;
 
         return function executedFunction() {
-            var context = this;
-            var args = arguments;
+            const context = this;
+            const args = arguments;
 
-            var later = function() {
+            const later = function () {
                 timeout = null;
                 if (!immediate) func.apply(context, args);
             };
 
-            var callNow = immediate && !timeout;
+            const callNow = immediate && !timeout;
 
             clearTimeout(timeout);
 
@@ -65,34 +66,39 @@
 
     const makeFancy = () => {
         const groups = [...document.querySelectorAll('.ghx-parent-group')];
-        var storyLabels = new Set();
+        let storyLabels = new Set();
         [...groups].forEach(group => {
-            var issue;
+            let issue;
+
+            // loop over groups where parent story is in an other column
             group.querySelectorAll('span.ghx-key')
                 .forEach(label => {
-                issue = label.innerText;
-                storyLabels.add(issue);
+                    issue = label.innerText;
+                    storyLabels.add(issue);
 
-                makeLabelFancy(label, issue);
-                label.style.marginLeft = "10px";
-            });
+                    makeLabelFancy(label, issue);
+                });
 
-            if(group.classList.contains("ghx-home")) {
-                var story = group.querySelector('a.ghx-key-link');
-                issue = story.title;
+            // loop over groups, where the story is in the same column
+            if (!group.classList.contains("js-fake-parent")) {
+                // take first element, aka the parent story
+                const story = group.querySelector('a.ghx-key');
+                issue = story.dataset.tooltip;
                 storyLabels.add(issue);
             }
 
             colorChildren(group.querySelector('.ghx-subtask-group'), issue);
         });
 
-        document.querySelectorAll('.ghx-issue a.ghx-key-link')
+        // color in the parent stories in an additional loop, because parents, that have no children in the same column,
+        // wouldn't be colored otherwise
+        document.querySelectorAll('.ghx-issue a.ghx-key')
             .forEach(story => {
-            var issue = story.title;
-            if (!storyLabels.has(issue)) return;
+                const issue = story.dataset.tooltip;
+                if (!storyLabels.has(issue)) return;
 
-            makeLabelFancy(story, issue);
-        });
+                makeLabelFancy(story, issue);
+            });
     };
 
     document.addEventListener("DOMNodeInserted", debounce(makeFancy, 100));
