@@ -1,7 +1,10 @@
-﻿##Scripts for Jira Cloud Version
-<a href="./highlight_subtask.user.js">Highlight subtasks</a>
-<a href="./redirect-jira.user.js">Redirect Google Search</a>
+## Scripts for Jira Cloud Version
+
+[Highlight subtasks](https://github.com/raphaelimahorn/tampermonkey/blob/main/jira/highlight_subtasks.user.js)
+
+[Redirect Google Search](https://github.com/raphaelimahorn/tampermonkey/blob/main/jira/redirect-jira.user.js)
 
 
-##Scripts for Jira v8.9.1
-<a href="./issue_button.user.js">Issue Buttons</a>
+## Scripts for Jira v8.9.1
+
+[Issue Buttons](https://github.com/raphaelimahorn/tampermonkey/blob/main/jira/issue_buttons.user.js)
