@@ -44,6 +44,23 @@ function showToast(text, type = 'info', duration = 3000) {
 function copyToClipboard(newClip) {
     navigator.clipboard.writeText(newClip)
         .then(
-            success => showToast(`Successfully copied ${newClip.length} characters to clipboard`, 'success'),
-            err => showToast('Could not copy to clipboard', 'warn'));
+            _ => showToast(`Successfully copied ${newClip.length} characters to clipboard`, 'success'),
+            _ => showToast('Could not copy to clipboard', 'warn'));
+}
+
+/**
+ * copy a url to clipboard
+ * @param {string} url the url to copy
+ * @param {string} text the text to be displayed
+ */
+function copyUrlToClipboard(url, text){
+
+    navigator.clipboard.write([new ClipboardItem(
+        {
+            "text/plain": new Blob([text], {type: "text/plain"}),
+            "text/html": new Blob([`<a href="${url}">${text}</a>`], {type: "text/html"})
+        }
+    )]).then(
+        _ => showToast('Successfully copied link to clipboard', 'success'),
+        _ => showToast('Could not copy to clipboard', 'warn'));
 }

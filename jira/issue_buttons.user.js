@@ -1,11 +1,11 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      1.1.1
+// @version      2.0.0
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
-// @description  adds some buttons to jira issues
+// @description  adds some functionality to jira issues
 // @author       raphael.imahorn
-// @match        *.atlassian.net/secure/RapidBoard.jspa*
+// @match        *.atlassian.net/*
 // @grant        none
 // ==/UserScript==
 
@@ -14,18 +14,8 @@
 
     const debug = false;
 
-    const buttonContainerClass = 'ri-jira-footer-buttons';
-    const buttonClass = 'ri-jira-story-button';
+    const issueCardClass = 'ghx-issue';
     const teamName = loadOrInsertFromStorage('ri-jira-issues-team', 'Please insert your team name');
-
-    const getFooters = () => document.getElementsByClassName('ghx-card-footer');
-
-    const filterAlreadyModifiedFooters = footers => [...footers].filter(f => !f.classList.contains(buttonContainerClass));
-
-    const setButtonTextContent = (button, content) => {
-        button.classList.add('aui-button', 'aui-button-compact', 'aui-button-subtle', buttonClass);
-        button.appendChild(document.createTextNode(content));
-    };
 
     // common functions 
     function loadOrInsertFromStorage(id, description, defaultValue = '') {
@@ -38,21 +28,9 @@
         return userInput;
     }
 
-    function findParentOfClass(node, clazz) {
-        const parent = node.parentNode;
-
-        if (!parent?.classList) return;
-
-        return parent.classList.contains(clazz)
-            ? parent
-            : findParentOfClass(parent, clazz);
-    }
-
     function copyToClipboard(newClip) {
         navigator.clipboard.writeText(newClip)
-            .then(
-                success => showToast(`Successfully copied ${newClip.length} characters to clipboard`, 'success'),
-                err => showToast('Could not copy to clipboard', 'warn'));
+            .then(_ => showToast(`Successfully copied ${newClip.length} characters to clipboard`, 'success'), _ => showToast('Could not copy to clipboard', 'warn'));
     }
 
     function showToast(text, type = 'info', duration = 3000) {
@@ -83,179 +61,107 @@
           padding: 16px;
           border-radius: 4px;
     `;
-
         document.getElementsByTagName('body')[0].appendChild(toast);
-
         setTimeout(_ => toast.remove(), duration);
+    }
+
+    function copyUrlToClipboard(url, text) {
+        navigator.clipboard.write([new ClipboardItem({
+            "text/plain": new Blob([text], {type: "text/plain"}),
+            "text/html": new Blob([`<a href="${url}">${text}</a>`], {type: "text/html"})
+        })]).then(_ => showToast('Successfully copied link to clipboard', 'success'), _ => showToast('Could not copy to clipboard', 'warn'));
     }
 
     // end common functions
 
 
-    const findKeyNode = node => {
-        const issueNode = findParentOfClass(node, 'ghx-issue');
-        return issueNode?.getElementsByClassName('ghx-key')[0];
-    }
-
-    /** @param {Node} button
-     * @param {MouseEvent} event
-     */
-    const copyIssueAsMarkUp = (button, event) => {
-        const keyNode = findKeyNode(button);
-        if (!keyNode) return;
-
-        const issue = keyNode.textContent;
-        const issueUrl = keyNode.firstElementChild.href;
-
-        const link = `[${issue}](${issueUrl})`;
-        copyToClipboard(link);
-        event.stopPropagation();
-    };
-
-    /** @param {Node} button
-     * @param {MouseEvent} event
-     */
-    const copyBranchName = (button, event) => {
-        const keyNode = findKeyNode(button);
-        if (!keyNode) return;
-
-        const issue = keyNode.textContent.toLowerCase();
-
-        const prefix = issue.startsWith('sup') ? 'hotfix' : 'feature';
-
-        const link = `${prefix}/${teamName}/${issue}`;
-        copyToClipboard(link);
-        event.stopPropagation();
-    };
-
-    /**
-     * @param {Node} node
-     */
-    const getKeyAndTitleOfStory = node => {
-        const keyNode = findKeyNode(node);
-        if (!keyNode) return;
-
-        const key = keyNode.textContent;
-        const description = keyNode.nextSibling.textContent;
-        return `${key} ${description}`;
-    }
-
-    /**
-     * @param parent
-     * @param {Node} node
-     */
-    const getKeyAndTitleOfSubTask = (parent, node) => {
-        let subtask = getKeyAndTitleOfStory(node);
-        if (!subtask) return;
-
-
-        const parentKey = parent.getElementsByClassName('ghx-key')[0];
-        if (!parentKey) return subtask;
-
-        const key = parentKey.textContent;
-        const description = parentKey.nextSibling.textContent;
-        const story = `${key} ${description}`;
-
-        // used for interoperability with highlight_subtask userscript
-        const parts = subtask.split(' ➤ ');
-        subtask = parts[parts.length - 1];
-
-        if (subtask === story) return story;
-
-        return `${subtask} <- ${story}`;
-    }
-
-    /** @param {Node} button
-     * @param {MouseEvent} event
-     */
-    const copyKeyAndTitle = (button, event) => {
-        const parentNodeIfAny = findParentOfClass(button, 'ghx-parent-group');
-
-        const keyAndTitle = !parentNodeIfAny
-            ? getKeyAndTitleOfStory(button)
-            : getKeyAndTitleOfSubTask(parentNodeIfAny, button);
-
-        if (!keyAndTitle) return;
-
-        copyToClipboard(keyAndTitle);
-        event.stopPropagation();
-    };
-
-    const addCopyMarkupLink = parent => {
-        const btn = document.createElement('button');
-
-        setButtonTextContent(btn, '[]()'); // TODO
-
-        btn.onclick = event => copyIssueAsMarkUp(btn, event);
-
-        parent.appendChild(btn);
-    };
-
-    const addCopyBranchName = parent => {
-        if (!teamName) return;
-
-        const btn = document.createElement('button');
-
-        setButtonTextContent(btn, '~/~/~'); // TODO
-
-        btn.onclick = event => copyBranchName(btn, event);
-
-        parent.appendChild(btn);
-    };
-
-    const addCopyKeyAndTitle = parent => {
-        const btn = document.createElement('button');
-
-        setButtonTextContent(btn, 'desc'); // TODO
-
-        btn.onclick = event => copyKeyAndTitle(btn, event);
-
-        parent.appendChild(btn);
-    }
-
-    const addButtonListToFooters = footers => [...footers].forEach(footer => {
-        const container = document.createElement('div');
-        container.classList.add(buttonContainerClass);
-
-        // add buttons
-        addCopyKeyAndTitle(container);
-        addCopyBranchName(container);
-        addCopyMarkupLink(container);
-
-        footer.appendChild(container);
-    });
-
-    function addCss(customCss) {
-        const sheet = document.styleSheets[0];
-        sheet.insertRule(customCss);
+    function generateBranchName(key) {
+        const prefix = key.startsWith('sup') ? 'hotfix' : 'feature';
+        return `${prefix}/${teamName}/${key}`;
     }
 
     const main = () => {
-        if (debug) console.log('Started adding buttons to issues');
-
-        const footers = getFooters();
-
-        const filteredFooters = filterAlreadyModifiedFooters(getFooters());
-
-        if (debug) console.log(`found ${filteredFooters.length} elements to add buttons`);
-
-        addButtonListToFooters(filteredFooters);
-
-        if (!footers.length) setTimeout(main, 200);
+        if (document.URL.includes('/backlog')) return backlog();// has to be checked before boards
+        if (document.URL.includes('/boards')) return activeSprint();
+        if (document.URL.includes('/browse/')) return singleIssue();
     };
 
-    addCss(`
-    .${buttonContainerClass} {
-        display: inline-flex;
-        flex-grow: 99;
-        justify-content: flex-end;
-    }`);
-
-    addCss(`
-    .${buttonClass} {
-        padding: 0 !important;
-    }
-    `);
-
     main();
+
+    function getIssueCardOrNone(target) {
+        return target.find(t => t.classList.contains(issueCardClass))
+    }
+
+    function getKeyFromCard(card) {
+        const keyElement = card.querySelector('a.ghx-key');
+        return keyElement.ariaLabel;
+    }
+
+    function getDescriptionFromCard(card) {
+        const keyElement = card.querySelector('.ghx-summary');
+        return keyElement.textContent;
+    }
+
+    function getUrlFromCard(card) {
+        const keyElement = card.querySelector('a.ghx-key');
+        return keyElement.href;
+    }
+
+    function getContextMenu() {
+        return new Promise(resolve => setTimeout(resolve, 200)).then(_ => document.getElementById('gh-ctx-menu-content'));
+    }
+
+    function addItemToContextMenuList(list, text, func) {
+        const element = document.createElement('li');
+        const action = document.createElement('a');
+        element.classList.add('aui-list-item');
+        element.appendChild(action);
+        action.classList.add('aui-list-item-link');
+        action.title = text;
+        action.href = '#';
+        action.addEventListener('click', event => {
+            event.preventDefault();
+            func();
+        })
+        action.innerText = text;
+        list.appendChild(element);
+    }
+
+    function addItemsToContextMenu(contextMenu, key, description, url) {
+        const title = document.createElement('h5');
+        title.innerText = 'Infos Kopieren';
+        const list = document.createElement('ul');
+        list.classList.add('aui-list-section', 'aui-first');
+        addItemToContextMenuList(list, 'Id als Link kopieren', _ => copyUrlToClipboard(url, key));
+        addItemToContextMenuList(list, 'Id mit Beschreibung als Link kopieren', _ => copyUrlToClipboard(url, key + ' ' + description));
+        teamName && addItemToContextMenuList(list, 'Branchnamen kopieren', _ => copyToClipboard(generateBranchName(key)));
+        contextMenu.prepend(list);
+        contextMenu.prepend(title);
+    }
+
+    async function enrichContextMenu(contextEvent) {
+        const card = getIssueCardOrNone(contextEvent.path);
+        if (!card) {
+            return;
+        }
+        const key = getKeyFromCard(card);
+        const description = getDescriptionFromCard(card);
+        const url = getUrlFromCard(card);
+
+        const contextMenu = await getContextMenu();
+        addItemsToContextMenu(contextMenu, key, description, url);
+    }
+
+    function activeSprint() {
+        if (debug) console.log('Now in active Sprint');
+        document.addEventListener('contextmenu', event => enrichContextMenu(event))
+    }
+
+    function singleIssue() {
+        if (debug) console.log('Detail page not implemented yet');
+    }
+
+    function backlog() {
+        if (debug) console.log('Backlog is not implemented now');
+    }
 })();

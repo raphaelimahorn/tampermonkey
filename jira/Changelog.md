@@ -10,7 +10,12 @@
 * 1.0.2 Update default url to cloud version
 
 ## issue_buttons.user.js
-
+* 2.0.0. Update to jira cloud version
+  * Now working in jira cloud 
+  * Use contextmenu instead of buttons
+  * Copy URLs the right way (text and html) so tex can be better used in other applications
+  * Prepare to be used on backlog and on detail site
+  * general cleanup
 * 1.1.1. updates the script update url and changes the file extension to *.user.js s.t. tampermonkey recognises the script
 * 1.1.0. adds a new button to copy the Key and Title of the issue e.g. _XYZ-1234 Add a new Button_
 * 1.0.3. adds a missing question in prompt to get the team name 
