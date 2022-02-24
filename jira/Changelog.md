@@ -10,6 +10,7 @@
 * 1.0.2 Update default url to cloud version
 
 ## issue_buttons.user.js
+* 2.0.1. Add download url
 * 2.0.0. Update to jira cloud version
   * Now working in jira cloud 
   * Use contextmenu instead of buttons
