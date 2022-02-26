@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      2.0.2
+// @version      2.1.0
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
@@ -15,8 +15,9 @@
 
     const debug = false;
 
-    const issueCardClass = 'ghx-issue';
     const teamName = loadOrInsertFromStorage('ri-jira-issues-team', 'Please insert your team name');
+    
+    let issueCardClass = 'ghx-issue';
 
     // common functions 
     function loadOrInsertFromStorage(id, description, defaultValue = '') {
@@ -96,7 +97,7 @@
 
     function getKeyFromCard(card) {
         const keyElement = card.querySelector('a.ghx-key');
-        return keyElement.ariaLabel;
+        return keyElement.ariaLabel ?? keyElement.title;
     }
 
     function getDescriptionFromCard(card) {
@@ -156,6 +157,7 @@
 
     function activeSprint() {
         if (debug) console.log('Now in active Sprint');
+        issueCardClass = 'ghx-issue';
         document.addEventListener('contextmenu', event => enrichContextMenu(event))
     }
 
@@ -164,6 +166,8 @@
     }
 
     function backlog() {
-        if (debug) console.log('Backlog is not implemented now');
+        if (debug) console.log('Now in backlog');
+        issueCardClass = 'ghx-issue-content';
+        document.addEventListener('contextmenu', event => enrichContextMenu(event))
     }
 })();
