@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      2.1.0
+// @version      2.2.0
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
@@ -16,7 +16,7 @@
     const debug = false;
 
     const teamName = loadOrInsertFromStorage('ri-jira-issues-team', 'Please insert your team name');
-    
+
     let issueCardClass = 'ghx-issue';
 
     // common functions 
@@ -84,9 +84,7 @@
     }
 
     const main = () => {
-        if (document.URL.includes('/backlog')) return backlog();// has to be checked before boards
-        if (document.URL.includes('/boards')) return activeSprint();
-        if (document.URL.includes('/browse/')) return singleIssue();
+        document.addEventListener('contextmenu', event => enrichContextMenu(event))
     };
 
     main();
@@ -143,10 +141,23 @@
     }
 
     async function enrichContextMenu(contextEvent) {
+        // has to be checked before boards
+        if (document.URL.includes('/backlog')) {
+            backlog();
+        } else if (document.URL.includes('/boards')) {
+            activeSprint();
+        } else if (document.URL.includes('/browse/')) {
+            singleIssue();
+        } else {
+            if (debug) console.log('not in a supported area of the application')
+            return;
+        }
+
         const card = getIssueCardOrNone(contextEvent.path);
         if (!card) {
             return;
         }
+
         const key = getKeyFromCard(card);
         const description = getDescriptionFromCard(card);
         const url = getUrlFromCard(card);
@@ -158,7 +169,6 @@
     function activeSprint() {
         if (debug) console.log('Now in active Sprint');
         issueCardClass = 'ghx-issue';
-        document.addEventListener('contextmenu', event => enrichContextMenu(event))
     }
 
     function singleIssue() {
@@ -168,6 +178,5 @@
     function backlog() {
         if (debug) console.log('Now in backlog');
         issueCardClass = 'ghx-issue-content';
-        document.addEventListener('contextmenu', event => enrichContextMenu(event))
     }
 })();
