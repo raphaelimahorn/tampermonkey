@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Tag Assistant
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.0.1
 // @description  A script to create tags more easily
 // @author       raphael.imahorn
 // @match        https://dev.azure.com/*/tags
@@ -117,7 +117,7 @@
     }
 
     function getPathOfNode(node) {
-        return node.tagName === 'A' ? getVersion(node) : (node.getElementsByClassName('text-ellipsis')[0].textContent + '/');
+        return node.tagName === 'A' ? getVersion(node) : (node.getElementsByClassName('text-ellipsis')?.[0]?.textContent + '/');
     }
 
     function getFullPathFromNode(node) {

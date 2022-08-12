@@ -6,3 +6,4 @@
 
 ## tag_assistant.user.js
  * 1.0.0 Initial Version
+ * 1.1.1 Improve reliability
