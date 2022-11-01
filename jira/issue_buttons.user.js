@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      2.2.0
+// @version      2.2.1
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
@@ -80,7 +80,7 @@
     function generateBranchName(key) {
         const lowercaseKey = key.toLowerCase();
         const prefix = lowercaseKey.startsWith('sup') ? 'hotfix' : 'feature';
-        return `${prefix}/${teamName}/${lowercaseKey}`;
+        return `${prefix}/${teamName}/${lowercaseKey}`.toLowerCase();
     }
 
     const main = () => {
