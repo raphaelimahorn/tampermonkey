@@ -10,6 +10,7 @@
 * 1.0.2 Update default url to cloud version
 
 ## issue_buttons.user.js
+* 2.2.2. Fix issue, that path was not found on contextmenu event
 * 2.2.1. Export branch name in lower key
 * 2.2.0. Add support for navigation between pages
 * 2.1.0. Add support for backlog page
