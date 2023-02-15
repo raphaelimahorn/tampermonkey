@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Tag Assistant
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1
+// @version      1.0.2
 // @description  A script to create tags more easily
 // @author       raphael.imahorn
 // @match        https://dev.azure.com/*/tags
@@ -94,7 +94,7 @@
             box.style.padding = '5px';
             box.style.backgroundColor = '#f3d35d';
             box.style.color = '#000';
-            probeLocationDebouncer.call(e.path);
+            probeLocationDebouncer.call(e.composedPath());
         }
         document.getElementsByClassName('bolt-table')[0].addEventListener('mousemove', onMouseMove, {signal: abortSignal});
 
@@ -184,7 +184,7 @@
 
         async function handleClick(event) {
             event.preventDefault();
-            const nodeOrNone = getNodeOrNone(event.path);
+            const nodeOrNone = getNodeOrNone(event.composedPath());
             if (!nodeOrNone) return;
 
             const path = getFullPathFromNode(nodeOrNone);
