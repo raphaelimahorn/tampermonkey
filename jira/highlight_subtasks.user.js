@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Highlight subtasks
 // @namespace    http://tampermonkey.net/
-// @version      1.2.1
+// @version      1.2.0
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/highlight_subtasks.user.js
 // @description  It colors the JIRA-Ids so that subtasks are easily recognized to which story they belong
 // @author       raphael.imahorn
@@ -32,7 +32,7 @@
     const colorChildren = (group, issue) => {
         group.querySelectorAll('a.ghx-key')
             .forEach(task => {
-                if (task.classList.includes('dg-fancy')) return;
+                if (task.classList.contains('dg-fancy')) return;
                 // TODO, here one could split the inner html to 2 references
                 task.innerHTML = `${issue} &#10148; ${task.dataset.tooltip}`;
                 task.style.color = getRandomColor(issue);
@@ -80,7 +80,7 @@
                 });
 
             // loop over groups, where the story is in the same column
-            if (!group.classList.includes("js-fake-parent")) {
+            if (!group.classList.contains("js-fake-parent")) {
                 // take first element, aka the parent story
                 const story = group.querySelector('a.ghx-key');
                 issue = story.dataset.tooltip;
