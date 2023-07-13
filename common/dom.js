@@ -8,7 +8,7 @@ function findParentOfClass(node, clazz) {
 
     if (!parent?.classList) return;
 
-    return parent.classList.contains(clazz)
+    return parent.classList.includes(clazz)
         ? parent
         : findParentOfClass(parent, clazz);
 }

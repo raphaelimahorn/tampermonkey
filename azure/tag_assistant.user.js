@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Tag Assistant
 // @namespace    http://tampermonkey.net/
-// @version      1.0.2
+// @version      1.0.3
 // @description  A script to create tags more easily
 // @author       raphael.imahorn
 // @match        https://dev.azure.com/*/tags
@@ -51,7 +51,7 @@
 
         if (!parent?.classList) return;
 
-        return parent.classList.contains(clazz) ? parent : findParentOfClass(parent, clazz);
+        return parent.classList.includes(clazz) ? parent : findParentOfClass(parent, clazz);
     }
 
     class Debouncer {
@@ -106,7 +106,7 @@
     }
 
     function getNodeOrNone(target) {
-        return target.find(t => t.classList?.contains('bolt-tree-row'))
+        return target.find(t => t.classList?.includes('bolt-tree-row'))
     }
 
     function getVersion(node) {

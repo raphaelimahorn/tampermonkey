@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      2.2.2
+// @version      2.2.3
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
@@ -90,7 +90,7 @@
     main();
 
     function getIssueCardOrNone(target) {
-        return target.find(t => t.classList.contains(issueCardClass))
+        return target.find(t => t.classList.includes(issueCardClass))
     }
 
     function getKeyFromCard(card) {
