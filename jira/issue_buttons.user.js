@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      2.2.2
+// @version      2.2.3
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
@@ -17,7 +17,9 @@
 
     const teamName = loadOrInsertFromStorage('ri-jira-issues-team', 'Please insert your team name');
 
+    let isAlternate = true;
     let issueCardClass = 'ghx-issue';
+    const issueCardIdentifierAlternate = 'platform-board-kit.ui.card-container"';
 
     // common functions 
     function loadOrInsertFromStorage(id, description, defaultValue = '') {
@@ -90,7 +92,7 @@
     main();
 
     function getIssueCardOrNone(target) {
-        return target.find(t => t.classList.contains(issueCardClass))
+        return target.find(t => t.classList?.contains(issueCardClass) ?? false);
     }
 
     function getKeyFromCard(card) {
@@ -153,9 +155,13 @@
             return;
         }
 
-        const card = getIssueCardOrNone(contextEvent.composedPath());
-        if (!card) {
-            return;
+        let card = getIssueCardOrNone(contextEvent.composedPath());
+        isAlternate = !card;
+        if (isAlternate) {
+            card = getIssueCardOrNoneAlternate(contextEvent.composedPath());
+            if (!card) {
+                return;
+            }
         }
 
         const key = getKeyFromCard(card);
