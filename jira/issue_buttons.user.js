@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      2.2.3
+// @version      3.0.0
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
@@ -17,9 +17,7 @@
 
     const teamName = loadOrInsertFromStorage('ri-jira-issues-team', 'Please insert your team name');
 
-    let isAlternate = true;
-    let issueCardClass = 'ghx-issue';
-    const issueCardIdentifierAlternate = 'platform-board-kit.ui.card-container"';
+    let mode = "board";
 
     // common functions 
     function loadOrInsertFromStorage(id, description, defaultValue = '') {
@@ -91,55 +89,92 @@
 
     main();
 
+    function getIssueCardOnBoardOrNone(target) {
+
+        return target.find(t => t?.dataset.componentSelector === 'platform-board-kit.ui.card-container');
+    }
+
     function getIssueCardOrNone(target) {
-        return target.find(t => t.classList?.contains(issueCardClass) ?? false);
+        switch (mode) {
+            case "board":
+                return getIssueCardOnBoardOrNone(target);
+            case "backlog":
+                return target.find(t => t?.dataset.testid === 'software-context-menu.ui.context-menu.children-wrapper');
+            case "single": return undefined;
+        }
+        throw Error(`Can not get card in unknown mode ${mode}`);
+    }
+
+    function getKeyFromId(card) {
+        return card.id.replace("card-", "");
     }
 
     function getKeyFromCard(card) {
-        const keyElement = card.querySelector('a.ghx-key');
-        return keyElement.ariaLabel ?? keyElement.title;
+        switch (mode) {
+            case "board":
+                return getKeyFromId(card);
+            case "backlog":
+                const backlogKeyElement = card.querySelector('[data-test-id="software-backlog.card-list.card.card-contents.accessible-card-key"]');
+                return backlogKeyElement.lastChild.innerText;
+            case "single": return undefined;
+        }
+
+        throw Error(`Can not get key from card in unknown mode ${mode}`);
     }
 
-    function getDescriptionFromCard(card) {
-        const keyElement = card.querySelector('.ghx-summary');
+    function getDescriptionFromRolePresentation(card) {
+        const keyElement = card.querySelector('[role="presentation"]');
         return keyElement.textContent;
     }
 
+    function getDescriptionFromCard(card) {
+        switch (mode) {
+            case "board":
+                return getDescriptionFromRolePresentation(card);
+            case "backlog":
+                const backlogKeyElement = card.querySelector('[data-test-id="software-backlog.card-list.card.card-contents.accessible-card-key"]');
+                return backlogKeyElement.querySelector('div').innerText;
+            case "single": return undefined;
+        }
+
+        throw Error(`Can not get description from card in unknown mode ${mode}`);
+    }
+
     function getUrlFromCard(card) {
-        const keyElement = card.querySelector('a.ghx-key');
+        const keyElement = card.querySelector('a');
         return keyElement.href;
     }
 
     function getContextMenu() {
-        return new Promise(resolve => setTimeout(resolve, 200)).then(_ => document.getElementById('gh-ctx-menu-content'));
+        return new Promise(resolve => setTimeout(resolve, 200))
+            .then(_ => document.querySelector('[data-testid="software-context-menu.ui.context-menu-inner.context-menu-inner-container"]'));
     }
 
-    function addItemToContextMenuList(list, text, func) {
+    function addItemToContextMenuList(list, text, func, liClasses, aClasses, spanClasses) {
         const element = document.createElement('li');
-        const action = document.createElement('a');
-        element.classList.add('aui-list-item');
+        element.classList = liClasses;
+        const action = document.createElement('button');
         element.appendChild(action);
-        action.classList.add('aui-list-item-link');
         action.title = text;
         action.href = '#';
-        action.addEventListener('click', event => {
-            event.preventDefault();
-            func();
-        })
-        action.innerText = text;
+        action.onclick = func();
+        action.classList = aClasses;
+        const span = document.createElement('span');
+        span.innerText = text;
+        span.classList = spanClasses;
+        action.appendChild(span);
         list.appendChild(element);
     }
 
     function addItemsToContextMenu(contextMenu, key, description, url) {
-        const title = document.createElement('h5');
-        title.innerText = 'Infos Kopieren';
-        const list = document.createElement('ul');
-        list.classList.add('aui-list-section', 'aui-first');
-        addItemToContextMenuList(list, 'Id als Link kopieren', _ => copyUrlToClipboard(url, key));
-        addItemToContextMenuList(list, 'Id mit Beschreibung als Link kopieren', _ => copyUrlToClipboard(url, key + ' ' + description));
-        teamName && addItemToContextMenuList(list, 'Branchnamen kopieren', _ => copyToClipboard(generateBranchName(key)));
-        contextMenu.prepend(list);
-        contextMenu.prepend(title);
+        const list = contextMenu.querySelector('ul');
+        const liClasses = list.lastChild.classList;
+        const aClasses = list.lastChild.lastChild.classList;
+        const spanClasses = list.lastChild.lastChild.lastChild.classList;
+        list.appendChild(document.createElement('hr'));
+        addItemToContextMenuList(list, 'Id als Link kopieren', _ => copyUrlToClipboard(url, key), liClasses, aClasses, spanClasses);
+        addItemToContextMenuList(list, 'Id mit Beschreibung als Link kopieren', _ => copyUrlToClipboard(url, key + ' ' + description), liClasses, aClasses, spanClasses);
+        teamName && addItemToContextMenuList(list, 'Branchnamen kopieren', _ => copyToClipboard(generateBranchName(key)), liClasses, aClasses, spanClasses);
     }
 
     async function enrichContextMenu(contextEvent) {
@@ -156,13 +191,6 @@
         }
 
         let card = getIssueCardOrNone(contextEvent.composedPath());
-        isAlternate = !card;
-        if (isAlternate) {
-            card = getIssueCardOrNoneAlternate(contextEvent.composedPath());
-            if (!card) {
-                return;
-            }
-        }
 
         const key = getKeyFromCard(card);
         const description = getDescriptionFromCard(card);
@@ -173,16 +201,17 @@
     }
 
     function activeSprint() {
+        mode = "board";
         if (debug) console.log('Now in active Sprint');
-        issueCardClass = 'ghx-issue';
     }
 
     function singleIssue() {
+        mode = "single";
         if (debug) console.log('Detail page not implemented yet');
     }
 
     function backlog() {
         if (debug) console.log('Now in backlog');
-        issueCardClass = 'ghx-issue-content';
+        mode = "backlog";
     }
 })();
