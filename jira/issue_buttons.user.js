@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      3.0.0
+// @version      3.0.1
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
@@ -100,7 +100,8 @@
                 return getIssueCardOnBoardOrNone(target);
             case "backlog":
                 return target.find(t => t?.dataset.testid === 'software-context-menu.ui.context-menu.children-wrapper');
-            case "single": return undefined;
+            case "single":
+                return undefined;
         }
         throw Error(`Can not get card in unknown mode ${mode}`);
     }
@@ -116,7 +117,8 @@
             case "backlog":
                 const backlogKeyElement = card.querySelector('[data-test-id="software-backlog.card-list.card.card-contents.accessible-card-key"]');
                 return backlogKeyElement.lastChild.innerText;
-            case "single": return undefined;
+            case "single":
+                return undefined;
         }
 
         throw Error(`Can not get key from card in unknown mode ${mode}`);
@@ -134,7 +136,8 @@
             case "backlog":
                 const backlogKeyElement = card.querySelector('[data-test-id="software-backlog.card-list.card.card-contents.accessible-card-key"]');
                 return backlogKeyElement.querySelector('div').innerText;
-            case "single": return undefined;
+            case "single":
+                return undefined;
         }
 
         throw Error(`Can not get description from card in unknown mode ${mode}`);
@@ -157,7 +160,10 @@
         element.appendChild(action);
         action.title = text;
         action.href = '#';
-        action.onclick = func();
+        action.addEventListener('click', event => {
+            event.preventDefault();
+            func();
+        });
         action.classList = aClasses;
         const span = document.createElement('span');
         span.innerText = text;
