@@ -84,7 +84,7 @@
     }
 
     const main = () => {
-        document.addEventListener('contextmenu', event => enrichContextMenu(event))
+        document.addEventListener('auxclick', event => enrichContextMenu(event))
     };
 
     main();
