@@ -196,7 +196,14 @@
             return;
         }
 
-        let card = getIssueCardOrNone(contextEvent.composedPath());
+        let card;
+        
+        try {
+            card = getIssueCardOrNone(contextEvent.composedPath());
+        } catch (e) {
+            if (debug) console.warn('Could not find card corresponding to click event.', e);
+            return;
+        }
 
         const key = getKeyFromCard(card);
         const description = getDescriptionFromCard(card);
