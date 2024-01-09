@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      3.0.1
+// @version      3.0.2
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
