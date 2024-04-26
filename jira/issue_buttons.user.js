@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      3.0.2
+// @version      3.0.3
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
@@ -84,7 +84,7 @@
     }
 
     const main = () => {
-        document.addEventListener('contextmenu', event => enrichContextMenu(event))
+        document.addEventListener('auxclick', event => enrichContextMenu(event))
     };
 
     main();
@@ -196,7 +196,14 @@
             return;
         }
 
-        let card = getIssueCardOrNone(contextEvent.composedPath());
+        let card;
+        
+        try {
+            card = getIssueCardOrNone(contextEvent.composedPath());
+        } catch (e) {
+            if (debug) console.warn('Could not find card corresponding to click event.', e);
+            return;
+        }
 
         const key = getKeyFromCard(card);
         const description = getDescriptionFromCard(card);
