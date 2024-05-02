@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Jira Issue Buttons
 // @namespace    http://tampermonkey.net/
-// @version      3.0.3
+// @version      3.0.4
 // @updateURL    https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @downloadURL  https://raw.githubusercontent.com/raphaelimahorn/tampermonkey/main/jira/issue_buttons.user.js
 // @description  adds some functionality to jira issues
@@ -115,7 +115,7 @@
             case "board":
                 return getKeyFromId(card);
             case "backlog":
-                const backlogKeyElement = card.querySelector('[data-test-id="software-backlog.card-list.card.card-contents.accessible-card-key"]');
+                const backlogKeyElement = card.querySelector('[data-testid="software-backlog.card-list.card.card-contents.accessible-card-key"]');
                 return backlogKeyElement.lastChild.innerText;
             case "single":
                 return undefined;
@@ -134,7 +134,7 @@
             case "board":
                 return getDescriptionFromRolePresentation(card);
             case "backlog":
-                const backlogKeyElement = card.querySelector('[data-test-id="software-backlog.card-list.card.card-contents.accessible-card-key"]');
+                const backlogKeyElement = card.querySelector('[data-testid="software-backlog.card-list.card.card-contents.accessible-card-key"]');
                 return backlogKeyElement.querySelector('div').innerText;
             case "single":
                 return undefined;
@@ -197,7 +197,7 @@
         }
 
         let card;
-        
+
         try {
             card = getIssueCardOrNone(contextEvent.composedPath());
         } catch (e) {

@@ -9,6 +9,7 @@
 * 1.0.2 Update default url to cloud version
 
 ## issue_buttons.user.js
+* 3.0.4. Fix error where script didn't work for backlog
 * 3.0.3. Fix error where description sometimes was copied twice
 * 3.0.2. Replace contextmenu event with auxclick, since the former is no longer thrown
 * 3.0.1. Fix error where action wasn't performed as desired
